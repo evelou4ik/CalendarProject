@@ -52,11 +52,15 @@ ul {
     font-weight: 700;
 }
 
-.calendar_days, .calendar_list {
+.calendar_weekdays, .calendar_days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     list-style-type: none;
     text-align: center;
+}
+
+.calendar_weekdays, .calendar_days li {
+    padding: 5px;
 }
 
 
