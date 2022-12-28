@@ -10,14 +10,18 @@ class Calendar {
     date = new Date();
     dateOfMonth = this.date.getMonth();
     dateOfYear = this.date.getFullYear();
+    currentDay = this.date.getDate();
+    firstDayOfMonth = new Date(this.dateOfYear, this.dateOfMonth, 0).getDay();
     calendarWeekdays;
     calendarDays;
-    firstDayOfMonth;
+
 
     constructor() {
         this._createCalendarHTML();
+        this._createForm();
         this._createWeekdays();
-        this._addDaysToCalendar(this._getCountOfDaysInMonth(this.dateOfYear,this.dateOfMonth + 1))
+        this._addDaysToCalendar(this._getCountOfDaysInMonth(this.dateOfYear,this.dateOfMonth + 1));
+        document.querySelector("#search_day").addEventListener("keyup", this._createMaskOfInput.bind(this))
     }
 
     _createCalendarHTML() {
@@ -42,6 +46,7 @@ class Calendar {
             btn.addEventListener('click', this._switchMonthOnClick.bind(this))
         })
     }
+
     _createCalendarElementDayHTML(day = "") {
         const html = document.createElement('LI');
 
@@ -49,6 +54,7 @@ class Calendar {
 
         return html;
     }
+
     _createWeekdays() {
         this.calendarWeekdays = document.querySelector('.calendar_weekdays');
 
@@ -58,16 +64,18 @@ class Calendar {
             this.calendarWeekdays.append(calendarWeekdayHtml);
         })
     }
+
     _getCountOfDaysInMonth(year, month) {
         return new Date(year, month, 0).getDate();
     }
+
     _addEmptyLi(calendarWrapDays) {
         this.firstDayOfMonth = new Date(this.dateOfYear, this.dateOfMonth, 0).getDay();
-
         for(let i = 0; i < this.firstDayOfMonth; i++) {
             calendarWrapDays.append(this._createCalendarElementDayHTML());
         }
     }
+
     _addDaysToCalendar(countOfDays) {
         this.calendarDays = document.querySelector(".calendar_days");
 
@@ -76,53 +84,111 @@ class Calendar {
         for(let i = 1; i <= countOfDays; i++) {
             const calendarDaysNumberHtml = this._createCalendarElementDayHTML([i])
 
+            if(calendarDaysNumberHtml.innerHTML === `${this.currentDay}` && this.dateOfMonth === this.date.getMonth()) {
+                calendarDaysNumberHtml.classList.add("current-day")
+            }
+
             this.calendarDays.append(calendarDaysNumberHtml)
         }
     }
+
+    _changeYear(indexMonth, btnClass) {
+        this.dateOfMonth = (btnClass === "btn--prev") ? this.lastMonth : this.firstMonth;
+
+        if(btnClass === "btn--prev") {
+            --this.dateOfYear;
+        } else {
+            ++this.dateOfYear;
+        }
+
+        document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
+        document.querySelector("#calendar_year_number").innerHTML = this.dateOfYear;
+    }
+
     _changeMonth(element, btnClass) {
+
         if(btnClass === "btn--prev") {
             --this.dateOfMonth;
         } else {
             ++this.dateOfMonth;
         }
 
-        if(element.classList.contains("btn--prev") ? this.dateOfMonth >= this.firstMonth : this.dateOfMonth <= this.lastMonth) {
-            document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
-        } else {
-            if(btnClass === "btn--prev") {
-                --this.dateOfYear;
-            } else {
-                ++this.dateOfYear;
-            }
-            this.dateOfMonth = extremeMonthValue;
+        document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
 
-            document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
-            document.querySelector("#calendar_year_number").innerHTML = this.dateOfYear;
+
+        if(element.classList.contains("btn--prev") && this.dateOfMonth < this.firstMonth) {
+            this._changeYear(this.lastMonth, "btn--prev")
         }
+
+        if(element.classList.contains("btn--next") && this.dateOfMonth > this.lastMonth) {
+            this._changeYear(this.lastMonth, "btn--next")
+        }
+
+
+
     }
+
     _switchMonthOnClick(e) {
         let target = e.target;
 
         if (target.classList.contains("btn--prev")) {
-            this._changeMonth(target, "btn--prev", this.dateOfMonth, this.dateOfYear, this.lastMonth)
+            this._changeMonth(target, "btn--prev")
         }
 
         if (target.classList.contains("btn--next")) {
-            this._changeMonth(target, "btn--next", this.dateOfMonth, this.dateOfYear, this.firstMonth)
+            this._changeMonth(target, "btn--next")
         }
 
         this._updateDatesOfMonth(this.dateOfYear, this.dateOfMonth)
     }
+
     _clearListOfDays() {
         this.calendarDays.innerHTML = ``;
     }
+
     _updateDatesOfMonth(year, month) {
         this._clearListOfDays();
         this._addDaysToCalendar(this._getCountOfDaysInMonth(year,month + 1))
     }
+
+    _createForm() {
+        const html =
+            `
+                <div class="calendar__search_wrap"> 
+                    <span>Enter the date you want to search</span>
+                    <input id="search_day" class="calendar__search" type="text" placeholder="DD.MM.YYYY">
+                </div>
+                
+            `
+        container.insertAdjacentHTML('afterbegin', html);
+    }
+
+    _createMaskOfInput(e) {
+        let searchDateInput = document.querySelector('#search_day')
+        if(e.key === 'Enter' || e.keyCode === 13) {
+            let correctDateString = (searchDateInput.value.trim()).split(" ").join("");
+
+            const [day,month,year] = correctDateString.split(".")
+            searchDateInput.value = '';
+
+
+            if(!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+
+                this.dateOfMonth = Number(month);
+                this.dateOfYear = Number(year);
+                this.firstDayOfMonth = new Date(this.dateOfYear, --this.dateOfMonth, 0).getDay();
+                this._clearListOfDays();
+                this._addDaysToCalendar(this._getCountOfDaysInMonth(this.dateOfYear,this.dateOfMonth))
+            }
+
+        }
+    }
 }
 
 let calendar = new Calendar();
+
+
+
 
 
 

@@ -14,7 +14,9 @@ ul {
 
 .container {
     display: flex;
+    justify-content: center;
     align-items: center;
+    flex-direction: column;
     max-width: 1000px;
     height: 100vh;
     margin: 0 auto;
@@ -26,7 +28,7 @@ ul {
     max-width: 600px;
     margin: 0 auto;
     background-color:silver;
-    border-radius: 15px;
+    border-radius: 0 0 15px 15px;
 }
 
 .calendar_top {
@@ -60,8 +62,37 @@ ul {
 }
 
 .calendar_weekdays, .calendar_days li {
+    font-weight: 600;
     padding: 5px;
 }
+
+.current-day {
+    background-color: aliceblue;
+    border-radius: 5px;
+}
+
+.calendar__search_wrap {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    max-width: 600px;
+    width: 100%;
+    background-color: antiquewhite;
+    border-radius: 15px 15px 0 0;
+}
+
+.calendar__search_wrap span {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 20px;
+}
+
+.calendar__search_wrap .calendar__search {
+    width: 100%;
+}
+
+
 
 
 
