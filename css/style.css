@@ -64,11 +64,17 @@ ul {
 .calendar_weekdays, .calendar_days li {
     font-weight: 600;
     padding: 5px;
+    border-radius: 5px;
 }
 
 .current-day {
     background-color: aliceblue;
-    border-radius: 5px;
+
+}
+
+.search-day {
+    color: white;
+    background-color: darkolivegreen;
 }
 
 .calendar__search_wrap {
@@ -90,6 +96,25 @@ ul {
 
 .calendar__search_wrap .calendar__search {
     width: 100%;
+}
+
+.calendar__search_wrap .message {
+    display: none;
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.calendar__search_wrap .message.show {
+    display: block;
+    margin-top: 10px;
+}
+
+.calendar__search_wrap .message.error {
+    color: red;
+}
+
+.calendar__search_wrap .message.correct {
+    color: green;
 }
 
 

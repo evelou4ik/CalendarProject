@@ -21,7 +21,9 @@ class Calendar {
         this._createForm();
         this._createWeekdays();
         this._addDaysToCalendar(this._getCountOfDaysInMonth(this.dateOfYear,this.dateOfMonth + 1));
-        document.querySelector("#search_day").addEventListener("keyup", this._createMaskOfInput.bind(this))
+        document.querySelector("#search_day").addEventListener("keyup", this._takeSearchDate.bind(this))
+        document.querySelector("#search_day").addEventListener("keydown", this._clearMessageOutput.bind(this))
+
     }
 
     _createCalendarHTML() {
@@ -70,6 +72,7 @@ class Calendar {
     }
 
     _addEmptyLi(calendarWrapDays) {
+        console.log(this.dateOfMonth)
         this.firstDayOfMonth = new Date(this.dateOfYear, this.dateOfMonth, 0).getDay();
         for(let i = 0; i < this.firstDayOfMonth; i++) {
             calendarWrapDays.append(this._createCalendarElementDayHTML());
@@ -84,7 +87,7 @@ class Calendar {
         for(let i = 1; i <= countOfDays; i++) {
             const calendarDaysNumberHtml = this._createCalendarElementDayHTML([i])
 
-            if(calendarDaysNumberHtml.innerHTML === `${this.currentDay}` && this.dateOfMonth === this.date.getMonth()) {
+            if(calendarDaysNumberHtml.innerHTML === `${this.currentDay}` && this.dateOfMonth === this.date.getMonth() && this.dateOfYear === this.date.getFullYear()) {
                 calendarDaysNumberHtml.classList.add("current-day")
             }
 
@@ -114,7 +117,6 @@ class Calendar {
         }
 
         document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
-
 
         if(element.classList.contains("btn--prev") && this.dateOfMonth < this.firstMonth) {
             this._changeYear(this.lastMonth, "btn--prev")
@@ -157,32 +159,82 @@ class Calendar {
                 <div class="calendar__search_wrap"> 
                     <span>Enter the date you want to search</span>
                     <input id="search_day" class="calendar__search" type="text" placeholder="DD.MM.YYYY">
+                    <span class="message"></span>
                 </div>
                 
             `
         container.insertAdjacentHTML('afterbegin', html);
     }
 
-    _createMaskOfInput(e) {
+    _takeSearchDate(e) {
         let searchDateInput = document.querySelector('#search_day')
+
+        let regex = /^(3[01]|[12][0-9]|0[1-9])[\-\/\.](0[1-9]|1[012])[\-\/\.](19[3-9][0-9]|20[0-9][0-9])$/gm;
+
+
         if(e.key === 'Enter' || e.keyCode === 13) {
-            let correctDateString = (searchDateInput.value.trim()).split(" ").join("");
+            if(regex.test(searchDateInput.value)) {
+                let correctDateString = (searchDateInput.value.trim()).split(" ").join("");
+                let dateCharactersRegex = /[./-]+/;
+                let [day,month,year] = correctDateString.split(dateCharactersRegex);
 
-            const [day,month,year] = correctDateString.split(".")
-            searchDateInput.value = '';
+                searchDateInput.value = '';
 
+                this._dateOutput(day, month, year)
 
-            if(!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-
-                this.dateOfMonth = Number(month);
-                this.dateOfYear = Number(year);
-                this.firstDayOfMonth = new Date(this.dateOfYear, --this.dateOfMonth, 0).getDay();
-                this._clearListOfDays();
-                this._addDaysToCalendar(this._getCountOfDaysInMonth(this.dateOfYear,this.dateOfMonth))
+            } else {
+                this._messageOutput("error", "Invalid date, please try dd/mm/yyyy")
             }
-
         }
     }
+
+    _dateOutput(day, month, year) {
+        let validateCountOfDate = this._getCountOfDaysInMonth(year, month);
+
+        if(!isNaN(day) && !isNaN(month) && !isNaN(year) && Number(day) <= validateCountOfDate) {
+
+            let searchDay = day.replace(/^0{1}/gm, "");
+            this.dateOfMonth = Number(month);
+            this.dateOfYear = Number(year);
+            this.firstDayOfMonth = new Date(this.dateOfYear, --this.dateOfMonth, 0).getDay();
+
+
+
+            document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
+            document.querySelector("#calendar_year_number").innerHTML = this.dateOfYear;
+
+
+            this._clearListOfDays();
+            this._addDaysToCalendar(validateCountOfDate)
+            this._messageOutput("correct", "Your date is correctly displayed")
+
+            document.querySelectorAll("#calendar_days li").forEach(d => {
+                d.classList.remove("search-day")
+                if(d.innerHTML === `${searchDay}`) {
+                    d.classList.add("search-day")
+                }
+            })
+        } else {
+            this._messageOutput("error", "This date does not exist, please check the correctness of the entered data")
+        }
+    }
+
+    _messageOutput(type, textOfMessage) {
+        let message = document.querySelector(".message");
+
+        if(!message.classList.contains(`${type}`)) {
+            message.classList.add("show", `${type}`);
+            message.innerHTML = `${textOfMessage}`;
+        }
+    }
+
+    _clearMessageOutput() {
+        let message = document.querySelector(".message");
+
+        message.className = "message";
+        message.innerHTML = '';
+    }
+
 }
 
 let calendar = new Calendar();
