@@ -1,6 +1,6 @@
 "use strict"
 
-const container = document.querySelector('.container');
+const calendarContainer = document.querySelector('.container .calendar__body');
 
 class Calendar {
     arrayOfMonths = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
@@ -11,40 +11,41 @@ class Calendar {
     dateOfMonth = this.date.getMonth();
     dateOfYear = this.date.getFullYear();
     currentDay = this.date.getDate();
-    firstDayOfMonth = new Date(this.dateOfYear, this.dateOfMonth, 0).getDay();
+    firstDayOfMonth = null;
     calendarWeekdays;
     calendarDays;
+    calendarMonthName;
+    calendarYearName;
 
 
     constructor() {
         this._createCalendarHTML();
-        this._createForm();
         this._createWeekdays();
+        this._createForm();
         this._addDaysToCalendar(this._getCountOfDaysInMonth(this.dateOfYear,this.dateOfMonth + 1));
         document.querySelector("#search_day").addEventListener("keyup", this._takeSearchDate.bind(this))
         document.querySelector("#search_day").addEventListener("keydown", this._clearMessageOutput.bind(this))
-
     }
 
     _createCalendarHTML() {
         const html =
             `
-            <div class="calendar_wrap">
-                <div class="calendar_top">
-                    <button class="btn btn--prev">Попередній місяць</button>
-                    <span id="calendar_month_name">${this.arrayOfMonths[this.dateOfMonth]}</span>
-                    <span id="calendar_year_number">${this.dateOfYear}</span>
-                    <button class="btn btn--next">Наступний місяць</button>
+                <div class="calendar_wrap">
+                    <div class="calendar_top">
+                        <button class="btn btn--prev">Попередній місяць</button>
+                        <span id="calendar_month_name">${this.arrayOfMonths[this.dateOfMonth]}</span>
+                        <span id="calendar_year_number">${this.dateOfYear}</span>
+                        <button class="btn btn--next">Наступний місяць</button>
+                    </div>
+                    <div id="calendar__body">
+                        <ul class="calendar_weekdays"></ul>
+                        <ul id="calendar_days" class="calendar_days"></ul>
+                    </div>
                 </div>
-                <div id="calendar">
-                    <ul class="calendar_weekdays"></ul>
-                    <ul id="calendar_days" class="calendar_days"></ul>
-                </div>
-            </div>
             `
 
-        container.insertAdjacentHTML('afterbegin', html);
-        container.querySelectorAll(".btn").forEach(btn => {
+        calendarContainer.insertAdjacentHTML('afterbegin', html);
+        calendarContainer.querySelectorAll(".btn").forEach(btn => {
             btn.addEventListener('click', this._switchMonthOnClick.bind(this))
         })
     }
@@ -67,13 +68,9 @@ class Calendar {
         })
     }
 
-    _getCountOfDaysInMonth(year, month) {
-        return new Date(year, month, 0).getDate();
-    }
-
     _addEmptyLi(calendarWrapDays) {
-        console.log(this.dateOfMonth)
         this.firstDayOfMonth = new Date(this.dateOfYear, this.dateOfMonth, 0).getDay();
+
         for(let i = 0; i < this.firstDayOfMonth; i++) {
             calendarWrapDays.append(this._createCalendarElementDayHTML());
         }
@@ -95,8 +92,9 @@ class Calendar {
         }
     }
 
-    _changeYear(indexMonth, btnClass) {
-        this.dateOfMonth = (btnClass === "btn--prev") ? this.lastMonth : this.firstMonth;
+    _changeYear(btnClass) {
+        this.calendarMonthName = document.querySelector("#calendar_month_name");
+        this.calendarYearName = document.querySelector("#calendar_year_number");
 
         if(btnClass === "btn--prev") {
             --this.dateOfYear;
@@ -104,11 +102,14 @@ class Calendar {
             ++this.dateOfYear;
         }
 
-        document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
-        document.querySelector("#calendar_year_number").innerHTML = this.dateOfYear;
+        this.dateOfMonth = (btnClass === "btn--prev") ? this.lastMonth : this.firstMonth;
+        this.calendarMonthName.innerHTML = this.arrayOfMonths[this.dateOfMonth];
+        this.calendarYearName.innerHTML = this.dateOfYear;
     }
 
-    _changeMonth(element, btnClass) {
+    _changeMonth(btn, btnClass) {
+        this.calendarMonthName = document.querySelector("#calendar_month_name");
+
 
         if(btnClass === "btn--prev") {
             --this.dateOfMonth;
@@ -116,17 +117,15 @@ class Calendar {
             ++this.dateOfMonth;
         }
 
-        document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
+        this.calendarMonthName.innerHTML = this.arrayOfMonths[this.dateOfMonth];
 
-        if(element.classList.contains("btn--prev") && this.dateOfMonth < this.firstMonth) {
-            this._changeYear(this.lastMonth, "btn--prev")
+        if(btn.classList.contains("btn--prev") && this.dateOfMonth < this.firstMonth) {
+            this._changeYear("btn--prev")
         }
 
-        if(element.classList.contains("btn--next") && this.dateOfMonth > this.lastMonth) {
-            this._changeYear(this.lastMonth, "btn--next")
+        if(btn.classList.contains("btn--next") && this.dateOfMonth > this.lastMonth) {
+            this._changeYear("btn--next")
         }
-
-
 
     }
 
@@ -148,6 +147,10 @@ class Calendar {
         this.calendarDays.innerHTML = ``;
     }
 
+    _getCountOfDaysInMonth(year, month) {
+        return new Date(year, month, 0).getDate();
+    }
+
     _updateDatesOfMonth(year, month) {
         this._clearListOfDays();
         this._addDaysToCalendar(this._getCountOfDaysInMonth(year,month + 1))
@@ -157,20 +160,51 @@ class Calendar {
         const html =
             `
                 <div class="calendar__search_wrap"> 
-                    <span>Enter the date you want to search</span>
-                    <input id="search_day" class="calendar__search" type="text" placeholder="DD.MM.YYYY">
+                    <span class="calendar__search_title">Введіть дату, яку потрібно шукати</span>
+                    <input id="search_day" class="calendar__search" type="text" placeholder="ДД.ММ.РРРР">
                     <span class="message"></span>
                 </div>
                 
             `
-        container.insertAdjacentHTML('afterbegin', html);
+
+        calendarContainer.insertAdjacentHTML('afterbegin', html);
+    }
+
+    _dateOutput(day, month, year) {
+        let calendarMonthName = document.querySelector("#calendar_month_name");
+        let calendarYearName = document.querySelector("#calendar_year_number");
+        let validateCountOfDate = this._getCountOfDaysInMonth(year, month);
+
+        if(!isNaN(day) && !isNaN(month) && !isNaN(year) && Number(day) <= validateCountOfDate) {
+
+            let searchDay = day.replace(/^0{1}/gm, "");
+            this.dateOfMonth = Number(month);
+            this.dateOfYear = Number(year);
+            this.firstDayOfMonth = new Date(this.dateOfYear, --this.dateOfMonth, 0).getDay();
+
+            calendarMonthName.innerHTML = this.arrayOfMonths[this.dateOfMonth];
+            calendarYearName.innerHTML = this.dateOfYear;
+
+            this._clearListOfDays();
+            this._addDaysToCalendar(validateCountOfDate);
+            this._messageOutput("correct", "Ваша дата відображена у календарі");
+
+            document.querySelectorAll("#calendar_days li").forEach(d => {
+                d.classList.remove("search-day")
+
+                if(d.innerHTML === `${searchDay}`) {
+                    d.classList.add("search-day")
+                }
+
+            })
+        } else {
+            this._messageOutput("error", "Цієї дати не існує, перевірте правильність введених даних")
+        }
     }
 
     _takeSearchDate(e) {
-        let searchDateInput = document.querySelector('#search_day')
-
+        let searchDateInput = document.querySelector('#search_day');
         let regex = /^(3[01]|[12][0-9]|0[1-9])[\-\/\.](0[1-9]|1[012])[\-\/\.](19[3-9][0-9]|20[0-9][0-9])$/gm;
-
 
         if(e.key === 'Enter' || e.keyCode === 13) {
             if(regex.test(searchDateInput.value)) {
@@ -183,39 +217,8 @@ class Calendar {
                 this._dateOutput(day, month, year)
 
             } else {
-                this._messageOutput("error", "Invalid date, please try dd/mm/yyyy")
+                this._messageOutput("error", "Некоректні дані, спробуйте перевірити дату або спробуйте ввести у форматі дд/мм/рррр")
             }
-        }
-    }
-
-    _dateOutput(day, month, year) {
-        let validateCountOfDate = this._getCountOfDaysInMonth(year, month);
-
-        if(!isNaN(day) && !isNaN(month) && !isNaN(year) && Number(day) <= validateCountOfDate) {
-
-            let searchDay = day.replace(/^0{1}/gm, "");
-            this.dateOfMonth = Number(month);
-            this.dateOfYear = Number(year);
-            this.firstDayOfMonth = new Date(this.dateOfYear, --this.dateOfMonth, 0).getDay();
-
-
-
-            document.querySelector("#calendar_month_name").innerHTML = this.arrayOfMonths[this.dateOfMonth];
-            document.querySelector("#calendar_year_number").innerHTML = this.dateOfYear;
-
-
-            this._clearListOfDays();
-            this._addDaysToCalendar(validateCountOfDate)
-            this._messageOutput("correct", "Your date is correctly displayed")
-
-            document.querySelectorAll("#calendar_days li").forEach(d => {
-                d.classList.remove("search-day")
-                if(d.innerHTML === `${searchDay}`) {
-                    d.classList.add("search-day")
-                }
-            })
-        } else {
-            this._messageOutput("error", "This date does not exist, please check the correctness of the entered data")
         }
     }
 

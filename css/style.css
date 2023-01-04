@@ -3,8 +3,8 @@
 }
 
 body {
-    background-color: black;
-    font-family: 'Roboto';
+    background-color: #e6dc83;
+    font-family: 'Montserrat', sans-serif;
 }
 
 ul {
@@ -22,36 +22,49 @@ ul {
     margin: 0 auto;
 }
 
+.calendar__body {
+    padding: 45px;
+    background-color: #29323f;
+    box-shadow: 5px 10px 20px rgb(0 0 0 / 60%);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
 .calendar_wrap {
-    padding: 30px;
+    margin: 0 auto;
     width: 100%;
     max-width: 600px;
-    margin: 0 auto;
-    background-color:silver;
-    border-radius: 0 0 15px 15px;
 }
 
 .calendar_top {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 30px;
+    margin: 0 -5px 30px;
 }
 
-.calendar_top button {
+.calendar_top .btn {
     margin: 0 5px;
     padding: 10px;
+    background-color: transparent;
+    border: 2px solid #fcee6d;
     border-radius: 10px;
-    border: none;
-    background-color: #358b3a;
     color: white;
     cursor: pointer;
+    transition-property: background-color, color;
+    transition-duration: .3s;
+}
+
+.calendar_top .btn:hover {
+    background-color: #fcee6d;
+    color: #29323f;
 }
 
 .calendar_top span {
     margin: 0 5px;
     font-size: 20px;
     font-weight: 700;
+    color: #fcee6d;
 }
 
 .calendar_weekdays, .calendar_days {
@@ -61,15 +74,22 @@ ul {
     text-align: center;
 }
 
+.calendar_weekdays li {
+    color: #999;
+}
+
 .calendar_weekdays, .calendar_days li {
     font-weight: 600;
     padding: 5px;
     border-radius: 5px;
 }
 
-.current-day {
-    background-color: aliceblue;
+.calendar_days li {
+    color: white;
+}
 
+.current-day {
+    background-color: #5e95c5;
 }
 
 .search-day {
@@ -81,11 +101,9 @@ ul {
     display: flex;
     justify-content: center;
     flex-direction: column;
-    padding: 20px;
+    margin-bottom: 50px;
     max-width: 600px;
     width: 100%;
-    background-color: antiquewhite;
-    border-radius: 15px 15px 0 0;
 }
 
 .calendar__search_wrap span {
@@ -104,17 +122,26 @@ ul {
     font-size: 14px;
 }
 
+.calendar__search_wrap .calendar__search {
+    outline: none;
+    padding: 10px;
+}
+
 .calendar__search_wrap .message.show {
     display: block;
     margin-top: 10px;
 }
 
 .calendar__search_wrap .message.error {
-    color: red;
+    color: #ff5454;
 }
 
 .calendar__search_wrap .message.correct {
-    color: green;
+    color: #57ff57;
+}
+
+.calendar__search_title {
+    color: white;
 }
 
 
